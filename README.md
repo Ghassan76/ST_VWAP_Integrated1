@@ -1,0 +1,1 @@
+# ST_VWAP_Integrated1
