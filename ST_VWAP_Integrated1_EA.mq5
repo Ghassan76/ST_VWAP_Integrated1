@@ -270,7 +270,7 @@ void   ParamSetInt(MqlParam &param,const int value);
 void   ParamSetDouble(MqlParam &param,const double value);
 void   ParamSetString(MqlParam &param,const string value);
 void   ParamSetColor(MqlParam &param,const color value);
-int    PrepareIndicatorParams(MqlParam &params[]);
+void   PrepareIndicatorParams(MqlParam &params[]);
 int    DetermineVolumeDigits(const double step);
 
 void ParamSetBool(MqlParam &param,const bool value)
@@ -303,15 +303,15 @@ void ParamSetColor(MqlParam &param,const color value)
    param.integer_value = (int)value;
 }
 
-int PrepareIndicatorParams(MqlParam &params[])
+void PrepareIndicatorParams(MqlParam &params[])
 {
    ArrayResize(params,69);
    int idx = 0;
    ParamSetInt(params[idx++],ST_ATRPeriod);
    ParamSetDouble(params[idx++],ST_Multiplier);
-   ParamSetInt(params[idx++],ST_Price);
+   ParamSetInt(params[idx++],(int)ST_Price);
    ParamSetBool(params[idx++],ST_Filling);
-   ParamSetInt(params[idx++],VWAP_PriceMethod);
+   ParamSetInt(params[idx++],(int)VWAP_PriceMethod);
    ParamSetDouble(params[idx++],VWAP_MinVolume);
    ParamSetBool(params[idx++],VWAP_ShowWeekly);
    ParamSetBool(params[idx++],VWAP_ShowMonthly);
@@ -361,7 +361,7 @@ int PrepareIndicatorParams(MqlParam &params[])
    ParamSetInt(params[idx++],Session_StartMinute);
    ParamSetInt(params[idx++],Session_EndHour);
    ParamSetInt(params[idx++],Session_EndMinute);
-   ParamSetInt(params[idx++],Session_Mode);
+   ParamSetInt(params[idx++],(int)Session_Mode);
    ParamSetString(params[idx++],Dash_Font);
    ParamSetInt(params[idx++],Dash_LabelFontSize);
    ParamSetInt(params[idx++],Dash_ValueFontSize);
@@ -376,7 +376,6 @@ int PrepareIndicatorParams(MqlParam &params[])
    ParamSetColor(params[idx++],Dash_AvgColor);
    ParamSetInt(params[idx++],Dash_SpacerLines);
    ParamSetInt(params[idx++],Dash_RowGapPixels);
-   return idx;
 }
 
 int DetermineVolumeDigits(const double step)
@@ -531,9 +530,9 @@ bool InitializeIndicator()
       IndicatorRelease(g_indicatorHandle);
 
    MqlParam params[];
-   int paramCount = PrepareIndicatorParams(params);
+   PrepareIndicatorParams(params);
 
-   g_indicatorHandle = IndicatorCreate(_Symbol,_Period,INDICATOR_CUSTOM,"ST_VWAP_Integrated1",paramCount,params);
+   g_indicatorHandle = iCustom(_Symbol,_Period,"ST_VWAP_Integrated1",params);
 
    if(g_indicatorHandle==INVALID_HANDLE)
    {
