@@ -270,7 +270,7 @@ void   ParamSetInt(MqlParam &param,const int value);
 void   ParamSetDouble(MqlParam &param,const double value);
 void   ParamSetString(MqlParam &param,const string value);
 void   ParamSetColor(MqlParam &param,const color value);
-void   PrepareIndicatorParams(MqlParam &params[]);
+int    PrepareIndicatorParams(MqlParam &params[]);
 int    DetermineVolumeDigits(const double step);
 
 void ParamSetBool(MqlParam &param,const bool value)
@@ -303,14 +303,18 @@ void ParamSetColor(MqlParam &param,const color value)
    param.integer_value = (int)value;
 }
 
-void PrepareIndicatorParams(MqlParam &params[])
+int PrepareIndicatorParams(MqlParam &params[])
 {
-   ArrayResize(params,69);
+   ArrayResize(params,70);
    int idx = 0;
+
+   ParamSetString(params[idx++],"ST_VWAP_Integrated1");
+
    ParamSetInt(params[idx++],ST_ATRPeriod);
    ParamSetDouble(params[idx++],ST_Multiplier);
    ParamSetInt(params[idx++],(int)ST_Price);
    ParamSetBool(params[idx++],ST_Filling);
+
    ParamSetInt(params[idx++],(int)VWAP_PriceMethod);
    ParamSetDouble(params[idx++],VWAP_MinVolume);
    ParamSetBool(params[idx++],VWAP_ShowWeekly);
@@ -318,11 +322,13 @@ void PrepareIndicatorParams(MqlParam &params[])
    ParamSetBool(params[idx++],VWAP_FilterDaily);
    ParamSetBool(params[idx++],VWAP_FilterWeekly);
    ParamSetBool(params[idx++],VWAP_FilterMonthly);
+
    ParamSetBool(params[idx++],AVWAP_Session_Enable);
    ParamSetInt(params[idx++],AVWAP_Session_Hour);
    ParamSetInt(params[idx++],AVWAP_Session_Min);
    ParamSetColor(params[idx++],AVWAP_Session_Color);
    ParamSetBool(params[idx++],AVWAP_Session_Filter);
+
    ParamSetBool(params[idx++],Show_VWAP_Line);
    ParamSetBool(params[idx++],Show_Arrows);
    ParamSetColor(params[idx++],BullArrowColor);
@@ -330,6 +336,7 @@ void PrepareIndicatorParams(MqlParam &params[])
    ParamSetColor(params[idx++],RejectArrowColor);
    ParamSetInt(params[idx++],ArrowCodeUp);
    ParamSetInt(params[idx++],ArrowCodeDn);
+
    ParamSetBool(params[idx++],Alert_Enabled);
    ParamSetBool(params[idx++],Alert_Popup);
    ParamSetBool(params[idx++],Alert_Sound);
@@ -343,8 +350,10 @@ void PrepareIndicatorParams(MqlParam &params[])
    ParamSetString(params[idx++],Alert_Prefix);
    ParamSetInt(params[idx++],Alert_PointsFormat);
    ParamSetString(params[idx++],Alert_UniqueID);
+
    ParamSetBool(params[idx++],Show_Debug);
    ParamSetBool(params[idx++],ResetStatsOnAttach);
+
    ParamSetBool(params[idx++],Dash_Enable);
    ParamSetInt(params[idx++],Dash_FontSize);
    ParamSetColor(params[idx++],Dash_TextColor);
@@ -362,6 +371,7 @@ void PrepareIndicatorParams(MqlParam &params[])
    ParamSetInt(params[idx++],Session_EndHour);
    ParamSetInt(params[idx++],Session_EndMinute);
    ParamSetInt(params[idx++],(int)Session_Mode);
+
    ParamSetString(params[idx++],Dash_Font);
    ParamSetInt(params[idx++],Dash_LabelFontSize);
    ParamSetInt(params[idx++],Dash_ValueFontSize);
@@ -376,6 +386,8 @@ void PrepareIndicatorParams(MqlParam &params[])
    ParamSetColor(params[idx++],Dash_AvgColor);
    ParamSetInt(params[idx++],Dash_SpacerLines);
    ParamSetInt(params[idx++],Dash_RowGapPixels);
+
+   return idx;
 }
 
 int DetermineVolumeDigits(const double step)
@@ -530,9 +542,9 @@ bool InitializeIndicator()
       IndicatorRelease(g_indicatorHandle);
 
    MqlParam params[];
-   PrepareIndicatorParams(params);
+   int total = PrepareIndicatorParams(params);
 
-   g_indicatorHandle = iCustom(_Symbol,_Period,"ST_VWAP_Integrated1",params);
+   g_indicatorHandle = IndicatorCreate(_Symbol,_Period,IND_CUSTOM,total,params);
 
    if(g_indicatorHandle==INVALID_HANDLE)
    {
