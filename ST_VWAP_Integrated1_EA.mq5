@@ -266,6 +266,47 @@ bool   IsSpreadValid();
 int    ExtractDayOfWeek(const datetime value);
 int    ExtractMinutesOfDay(const datetime value);
 int    DetermineVolumeDigits(const double step);
+int    PrepareIndicatorParams(MqlParam &params[]);
+void   ParamSetInt(MqlParam &param,const int value);
+void   ParamSetDouble(MqlParam &param,const double value);
+void   ParamSetBool(MqlParam &param,const bool value);
+void   ParamSetString(MqlParam &param,const string value);
+void   ParamSetColor(MqlParam &param,const color value);
+
+void ParamSetInt(MqlParam &param,const int value)
+{
+   ZeroMemory(param);
+   param.type = TYPE_INT;
+   param.integer_value = (long)value;
+}
+
+void ParamSetDouble(MqlParam &param,const double value)
+{
+   ZeroMemory(param);
+   param.type = TYPE_DOUBLE;
+   param.double_value = value;
+}
+
+void ParamSetBool(MqlParam &param,const bool value)
+{
+   ZeroMemory(param);
+   param.type = TYPE_BOOL;
+   param.integer_value = value ? 1 : 0;
+}
+
+void ParamSetString(MqlParam &param,const string value)
+{
+   ZeroMemory(param);
+   param.type = TYPE_STRING;
+   param.string_value = value;
+}
+
+void ParamSetColor(MqlParam &param,const color value)
+{
+   ZeroMemory(param);
+   param.type = TYPE_INT;
+   param.integer_value = (long)value;
+}
 
 int DetermineVolumeDigits(const double step)
 {
@@ -280,6 +321,93 @@ int DetermineVolumeDigits(const double step)
       digits++;
    }
    return(digits);
+}
+
+int PrepareIndicatorParams(MqlParam &params[])
+{
+   ArrayResize(params,70);
+   int idx = 0;
+
+   ParamSetString(params[idx++],"ST_VWAP_Integrated1");
+
+   ParamSetInt   (params[idx++],ST_ATRPeriod);
+   ParamSetDouble(params[idx++],ST_Multiplier);
+   ParamSetInt   (params[idx++],(int)ST_Price);
+   ParamSetBool  (params[idx++],ST_Filling);
+
+   ParamSetInt   (params[idx++],(int)VWAP_PriceMethod);
+   ParamSetDouble(params[idx++],VWAP_MinVolume);
+   ParamSetBool  (params[idx++],VWAP_ShowWeekly);
+   ParamSetBool  (params[idx++],VWAP_ShowMonthly);
+   ParamSetBool  (params[idx++],VWAP_FilterDaily);
+   ParamSetBool  (params[idx++],VWAP_FilterWeekly);
+   ParamSetBool  (params[idx++],VWAP_FilterMonthly);
+
+   ParamSetBool  (params[idx++],AVWAP_Session_Enable);
+   ParamSetInt   (params[idx++],AVWAP_Session_Hour);
+   ParamSetInt   (params[idx++],AVWAP_Session_Min);
+   ParamSetColor (params[idx++],AVWAP_Session_Color);
+   ParamSetBool  (params[idx++],AVWAP_Session_Filter);
+
+   ParamSetBool  (params[idx++],Show_VWAP_Line);
+   ParamSetBool  (params[idx++],Show_Arrows);
+   ParamSetColor (params[idx++],BullArrowColor);
+   ParamSetColor (params[idx++],BearArrowColor);
+   ParamSetColor (params[idx++],RejectArrowColor);
+   ParamSetInt   (params[idx++],ArrowCodeUp);
+   ParamSetInt   (params[idx++],ArrowCodeDn);
+
+   ParamSetBool  (params[idx++],Alert_Enabled);
+   ParamSetBool  (params[idx++],Alert_Popup);
+   ParamSetBool  (params[idx++],Alert_Sound);
+   ParamSetString(params[idx++],Alert_SoundFile);
+   ParamSetBool  (params[idx++],Alert_OnlyAccepted);
+   ParamSetBool  (params[idx++],Alert_Long);
+   ParamSetBool  (params[idx++],Alert_Short);
+   ParamSetBool  (params[idx++],Alert_OnlyInSession);
+   ParamSetBool  (params[idx++],Alert_OncePerBar);
+   ParamSetInt   (params[idx++],Alert_CooldownSeconds);
+   ParamSetString(params[idx++],Alert_Prefix);
+   ParamSetInt   (params[idx++],Alert_PointsFormat);
+   ParamSetString(params[idx++],Alert_UniqueID);
+
+   ParamSetBool  (params[idx++],Show_Debug);
+   ParamSetBool  (params[idx++],ResetStatsOnAttach);
+
+   ParamSetBool  (params[idx++],Dash_Enable);
+   ParamSetInt   (params[idx++],Dash_FontSize);
+   ParamSetColor (params[idx++],Dash_TextColor);
+   ParamSetInt   (params[idx++],Dash_X);
+   ParamSetInt   (params[idx++],Dash_Y);
+   ParamSetColor (params[idx++],Dash_BgColor);
+   ParamSetColor (params[idx++],Dash_BorderColor);
+   ParamSetInt   (params[idx++],Dash_Corner);
+   ParamSetInt   (params[idx++],Dash_Width);
+   ParamSetInt   (params[idx++],Dash_Height);
+   ParamSetInt   (params[idx++],MFE_LookaheadBars);
+   ParamSetBool  (params[idx++],Session_Enable);
+   ParamSetInt   (params[idx++],Session_StartHour);
+   ParamSetInt   (params[idx++],Session_StartMinute);
+   ParamSetInt   (params[idx++],Session_EndHour);
+   ParamSetInt   (params[idx++],Session_EndMinute);
+   ParamSetInt   (params[idx++],(int)Session_Mode);
+
+   ParamSetString(params[idx++],Dash_Font);
+   ParamSetInt   (params[idx++],Dash_LabelFontSize);
+   ParamSetInt   (params[idx++],Dash_ValueFontSize);
+   ParamSetInt   (params[idx++],Dash_LabelXOffset);
+   ParamSetInt   (params[idx++],Dash_ValueXOffset);
+   ParamSetColor (params[idx++],Dash_AccentColor);
+   ParamSetColor (params[idx++],Dash_GoodColor);
+   ParamSetColor (params[idx++],Dash_BadColor);
+   ParamSetColor (params[idx++],Dash_MutedColor);
+   ParamSetColor (params[idx++],Dash_BullishColor);
+   ParamSetColor (params[idx++],Dash_BearishColor);
+   ParamSetColor (params[idx++],Dash_AvgColor);
+   ParamSetInt   (params[idx++],Dash_SpacerLines);
+   ParamSetInt   (params[idx++],Dash_RowGapPixels);
+
+   return(idx);
 }
 
 //+------------------------------------------------------------------+
@@ -418,84 +546,16 @@ bool InitializeIndicator()
    if(g_indicatorHandle!=INVALID_HANDLE)
       IndicatorRelease(g_indicatorHandle);
 
-   g_indicatorHandle = iCustom(
-      _Symbol,
-      _Period,
-      "ST_VWAP_Integrated1",
-      ST_ATRPeriod,
-      ST_Multiplier,
-      (int)ST_Price,
-      ST_Filling,
-      (int)VWAP_PriceMethod,
-      VWAP_MinVolume,
-      VWAP_ShowWeekly,
-      VWAP_ShowMonthly,
-      VWAP_FilterDaily,
-      VWAP_FilterWeekly,
-      VWAP_FilterMonthly,
-      AVWAP_Session_Enable,
-      AVWAP_Session_Hour,
-      AVWAP_Session_Min,
-      (int)AVWAP_Session_Color,
-      AVWAP_Session_Filter,
-      Show_VWAP_Line,
-      Show_Arrows,
-      (int)BullArrowColor,
-      (int)BearArrowColor,
-      (int)RejectArrowColor,
-      ArrowCodeUp,
-      ArrowCodeDn,
-      Alert_Enabled,
-      Alert_Popup,
-      Alert_Sound,
-      Alert_SoundFile,
-      Alert_OnlyAccepted,
-      Alert_Long,
-      Alert_Short,
-      Alert_OnlyInSession,
-      Alert_OncePerBar,
-      Alert_CooldownSeconds,
-      Alert_Prefix,
-      Alert_PointsFormat,
-      Alert_UniqueID,
-      Show_Debug,
-      ResetStatsOnAttach,
-      Dash_Enable,
-      Dash_FontSize,
-      (int)Dash_TextColor,
-      Dash_X,
-      Dash_Y,
-      (int)Dash_BgColor,
-      (int)Dash_BorderColor,
-      Dash_Corner,
-      Dash_Width,
-      Dash_Height,
-      MFE_LookaheadBars,
-      Session_Enable,
-      Session_StartHour,
-      Session_StartMinute,
-      Session_EndHour,
-      Session_EndMinute,
-      (int)Session_Mode,
-      Dash_Font,
-      Dash_LabelFontSize,
-      Dash_ValueFontSize,
-      Dash_LabelXOffset,
-      Dash_ValueXOffset,
-      (int)Dash_AccentColor,
-      (int)Dash_GoodColor,
-      (int)Dash_BadColor,
-      (int)Dash_MutedColor,
-      (int)Dash_BullishColor,
-      (int)Dash_BearishColor,
-      (int)Dash_AvgColor,
-      Dash_SpacerLines,
-      Dash_RowGapPixels
-   );
+   MqlParam params[];
+   int total = PrepareIndicatorParams(params);
+
+   ResetLastError();
+   g_indicatorHandle = IndicatorCreate(_Symbol,(ENUM_TIMEFRAMES)_Period,IND_CUSTOM,total,params);
+   int err = GetLastError();
 
    if(g_indicatorHandle==INVALID_HANDLE)
    {
-      Print("Failed to create ST_VWAP_Integrated1 via iCustom. Error: ",GetLastError());
+      PrintFormat("Failed to create ST_VWAP_Integrated1 indicator. Error: %d (params=%d)",err,total);
       return(false);
    }
 
