@@ -3,6 +3,16 @@
 //| Uses ST_VWAP_Integrated1 indicator signals for trade execution. |
 //+------------------------------------------------------------------+
 #property strict
+
+#ifndef SYMBOL_FILLING_FOK
+#define SYMBOL_FILLING_FOK   1
+#endif
+#ifndef SYMBOL_FILLING_IOC
+#define SYMBOL_FILLING_IOC   2
+#endif
+#ifndef SYMBOL_FILLING_RETURN
+#define SYMBOL_FILLING_RETURN 4
+#endif
 #property copyright ""
 #property link      ""
 #property version   "1.0"
@@ -253,6 +263,8 @@ int    GetSignalDirection();
 void   RemovePendingSignal(const int index);
 bool   CustomDelayReady(const PendingSignal &ps);
 bool   IsSpreadValid();
+int    ExtractDayOfWeek(const datetime value);
+int    ExtractMinutesOfDay(const datetime value);
 
 //+------------------------------------------------------------------+
 //| Expert initialization                                            |
@@ -260,10 +272,14 @@ bool   IsSpreadValid();
 int OnInit()
 {
    g_isTester = (MQLInfoInteger(MQL_TESTER)==1);
-   int fillingFlags = (int)SymbolInfoInteger(_Symbol,SYMBOL_FILLING_MODE);
-   if((fillingFlags & SYMBOL_FILLING_RETURN)==SYMBOL_FILLING_RETURN)
+
+   long fillingFlags = 0;
+   if(!SymbolInfoInteger(_Symbol,SYMBOL_FILLING_MODE,fillingFlags))
+      fillingFlags = SYMBOL_FILLING_FOK;
+
+   if((fillingFlags & SYMBOL_FILLING_RETURN)!=0)
       g_fillingMode = ORDER_FILLING_RETURN;
-   else if((fillingFlags & SYMBOL_FILLING_IOC)==SYMBOL_FILLING_IOC)
+   else if((fillingFlags & SYMBOL_FILLING_IOC)!=0)
       g_fillingMode = ORDER_FILLING_IOC;
    else
       g_fillingMode = ORDER_FILLING_FOK;
@@ -353,7 +369,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,const MqlTradeRequest &
    profit += HistoryDealGetDouble(deal,DEAL_SWAP);
    profit += HistoryDealGetDouble(deal,DEAL_COMMISSION);
 
-   datetime dealTime = HistoryDealGetInteger(deal,DEAL_TIME);
+   datetime dealTime = (datetime)HistoryDealGetInteger(deal,DEAL_TIME);
 
    if(entry==DEAL_ENTRY_IN)
    {
@@ -516,7 +532,7 @@ int CountOpenPositions(const int direction)
 //+------------------------------------------------------------------+
 bool IsWeekdayAllowed(const datetime t)
 {
-   int day = TimeDayOfWeek(t);
+   int day = ExtractDayOfWeek(t);
    switch(day)
    {
       case 0: return ip_TradeSun;
@@ -540,7 +556,7 @@ bool IsWithinGeneralWindow(const datetime t)
 
    int begin = ip_BeginHour*60 + ip_BeginMinute;
    int end   = ip_EndHour*60 + ip_EndMinute;
-   int minutes = TimeHour(t)*60 + TimeMinute(t);
+   int minutes = ExtractMinutesOfDay(t);
 
    if(begin<=end)
       return(minutes>=begin && minutes<=end);
@@ -557,7 +573,7 @@ bool IsWithinSessions(const datetime t)
    if(!anySession)
       return(true);
 
-   int minutes = TimeHour(t)*60 + TimeMinute(t);
+   int minutes = ExtractMinutesOfDay(t);
 
    if(ip_UseSession1)
    {
@@ -618,6 +634,22 @@ bool IsWithinSessions(const datetime t)
    return(false);
 }
 
+int ExtractDayOfWeek(const datetime value)
+{
+   MqlDateTime dt;
+   if(TimeToStruct(value,dt))
+      return dt.day_of_week;
+   return 0;
+}
+
+int ExtractMinutesOfDay(const datetime value)
+{
+   MqlDateTime dt;
+   if(TimeToStruct(value,dt))
+      return dt.hour*60 + dt.min;
+   return 0;
+}
+
 //+------------------------------------------------------------------+
 //| Validate spread                                                  |
 //+------------------------------------------------------------------+
@@ -626,7 +658,9 @@ bool IsSpreadValid()
    if(ip_MaxSpreadPts<=0)
       return(true);
 
-   long spread = SymbolInfoInteger(_Symbol,SYMBOL_SPREAD);
+   long spread = 0;
+   if(!SymbolInfoInteger(_Symbol,SYMBOL_SPREAD,spread))
+      spread = 0;
    if(spread==0)
       spread = (long)MathRound((SymbolInfoDouble(_Symbol,SYMBOL_ASK) - SymbolInfoDouble(_Symbol,SYMBOL_BID))/_Point);
 
@@ -940,7 +974,10 @@ double CalculateVolume(const int direction,double &slPoints,double &tpPoints)
    if(maxLot>0)
       lot = MathMin(lot,maxLot);
 
-   int volDigits = (int)SymbolInfoInteger(_Symbol,SYMBOL_VOLUME_DIGITS);
+   long volDigitsRaw = 0;
+   if(!SymbolInfoInteger(_Symbol,SYMBOL_VOLUME_DIGITS,volDigitsRaw))
+      volDigitsRaw = 2;
+   int volDigits = (int)volDigitsRaw;
    lot = MathFloor(lot/step)*step;
    lot = NormalizeDouble(lot,volDigits);
    lot = MathMax(lot,minLot);
