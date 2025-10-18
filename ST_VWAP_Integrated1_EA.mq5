@@ -304,7 +304,7 @@ void ParamSetString(MqlParam &param,const string value)
 void ParamSetColor(MqlParam &param,const color value)
 {
    ZeroMemory(param);
-   param.type = TYPE_INT;
+   param.type = TYPE_COLOR;
    param.integer_value = (long)value;
 }
 
@@ -407,6 +407,7 @@ int PrepareIndicatorParams(MqlParam &params[])
    ParamSetInt   (params[idx++],Dash_SpacerLines);
    ParamSetInt   (params[idx++],Dash_RowGapPixels);
 
+   ArrayResize(params,idx);
    return(idx);
 }
 
